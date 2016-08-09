@@ -135,7 +135,7 @@ public class AverroesApplicationConstantPool {
 		 * org.jfree.data.xml.DatasetTags which is an interface that has some
 		 * final constants only.
 		 */
-		if (applicationClass.getMethodCount() > 0) {
+		if (applicationClass.getMethodCount() > 0 && !applicationClass.getName().equals("dummyMainClass")) { // TODO
 			ClassFile coffiClass = getCoffiClass(applicationClass);
 			cp_info[] constantPool = coffiClass.constant_pool;
 
@@ -235,7 +235,7 @@ public class AverroesApplicationConstantPool {
 		 * org.jfree.data.xml.DatasetTags which is an interface that has some
 		 * final constants only.
 		 */
-		if (applicationClass.getMethodCount() > 0) {
+		if (applicationClass.getMethodCount() > 0 && !applicationClass.getName().equals("dummyMainClass")) {
 			ClassFile coffiClass = getCoffiClass(applicationClass);
 			cp_info[] constantPool = coffiClass.constant_pool;
 
@@ -321,7 +321,7 @@ public class AverroesApplicationConstantPool {
 		 * org.jfree.data.xml.DatasetTags which is an interface that has some
 		 * final constants only.
 		 */
-		if (applicationClass.getMethodCount() > 0) {
+		if (applicationClass.getMethodCount() > 0 && !applicationClass.getName().equals("dummyMainClass")) {
 			ClassFile coffiClass = getCoffiClass(applicationClass);
 			cp_info[] constantPool = coffiClass.constant_pool;
 

@@ -82,9 +82,9 @@ public class JarOrganizer {
 	 * @throws URISyntaxException
 	 */
 	public void organizeInputJarFiles() throws ZipException, IOException {
-		processInputs();
+//		processInputs();
 		processDependencies();
-		organizedApplicationJarFile.close();
+//		organizedApplicationJarFile.close();
 		organizedLibraryJarFile.close();
 	}
 
@@ -145,6 +145,8 @@ public class JarOrganizer {
 		File file = new File(fileName);
 		System.out.println("Processing " + (fromApplicationArchive ? "input" : "library") + " archive: "
 				+ file.getAbsolutePath());
+		
+		
 
 		try {
 			ZipFile archive = new ZipFile(file);

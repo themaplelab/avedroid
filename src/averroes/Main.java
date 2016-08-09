@@ -10,7 +10,9 @@
  *******************************************************************************/
 package averroes;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 
@@ -18,8 +20,11 @@ import soot.ClassProvider;
 import soot.G;
 import soot.Scene;
 import soot.SootClass;
+import soot.SootMethod;
 import soot.SourceLocator;
+import soot.jimple.infoflow.android.SetupApplication;
 import soot.options.Options;
+import soot.util.Chain;
 import averroes.options.AverroesOptions;
 import averroes.soot.CodeGenerator;
 import averroes.soot.Hierarchy;
@@ -73,19 +78,43 @@ public class Main {
 			TimeUtils.reset();
 			JarFactoryClassProvider provider = new JarFactoryClassProvider();
 			provider.prepareJarFactoryClasspath();
+			
+			String androidJar = args[0];
+			String apkFileLocation = args[1];		
 
 			// Set some soot parameters
 			SourceLocator.v().setClassProviders(Collections.singletonList((ClassProvider) provider));
 			SootSceneUtil.addCommonDynamicClasses(provider);
 			Options.v().classes().addAll(provider.getApplicationClassNames());
-			Options.v().set_main_class(AverroesOptions.getMainClass());
-			Options.v().set_validate(true);
+			Options.v().set_src_prec(Options.src_prec_apk);
+			Options.v().set_soot_classpath(".:"+apkFileLocation+":"+androidJar);
+		
+			// Create dummy main
+			SetupApplication setup = new SetupApplication(androidJar, apkFileLocation);
+			setup.calculateSourcesSinksEntrypoints("SourcesAndSinks.txt");
+			Options.v().set_src_prec(Options.src_prec_apk);
+			Options.v().set_soot_classpath(".:"+apkFileLocation+":"+androidJar);
+			//Options.v().allow_phantom_refs();
+			SootMethod entryPoint = setup.getEntryPointCreator().createDummyMain();
+
+
+			System.out.println();
+			System.out.println("Class containing dummy main: " + entryPoint.getDeclaringClass().getName());
+			
+			// If we don't set the super class of the dummy main class, there will be an error
+			entryPoint.getDeclaringClass().setSuperclass(G.v().soot_Scene().getSootClass("java.lang.Object"));
 
 			// Load the necessary classes
 			System.out.println("");
 			System.out.println("Loading classes ...");
+
+			Options.v().set_main_class(entryPoint.getSignature());
+			Options.v().set_validate(true);
+
+			Scene.v().setEntryPoints(Arrays.asList(entryPoint));
+			
 			Scene.v().loadNecessaryClasses();
-			Scene.v().setMainClassFromOptions();
+			
 			double soot = TimeUtils.elapsedTime();
 			System.out.println("Soot loaded the input classes in " + soot + " seconds.");
 
