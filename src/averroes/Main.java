@@ -10,13 +10,17 @@
  *******************************************************************************/
 package averroes;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 
 import soot.ClassProvider;
+import soot.DexClassProvider;
 import soot.G;
 import soot.Scene;
 import soot.SootClass;
@@ -33,6 +37,9 @@ import averroes.soot.SootSceneUtil;
 import averroes.util.MathUtils;
 import averroes.util.TimeUtils;
 import averroes.util.io.Paths;
+import averroes.android.AndroidEntryPointCreator;
+import averroes.android.ApkHandler;
+import averroes.android.ProcessManifest;
 
 /**
  * The main Averroes class.
@@ -77,41 +84,41 @@ public class Main {
 			// dependencies.
 			TimeUtils.reset();
 			JarFactoryClassProvider provider = new JarFactoryClassProvider();
-			provider.prepareJarFactoryClasspath();
-			
-			String androidJar = args[0];
-			String apkFileLocation = args[1];		
+			provider.prepareJarFactoryClasspath();	
 
 			// Set some soot parameters
-			SourceLocator.v().setClassProviders(Collections.singletonList((ClassProvider) provider));
-			SootSceneUtil.addCommonDynamicClasses(provider);
-			Options.v().classes().addAll(provider.getApplicationClassNames());
-			Options.v().set_src_prec(Options.src_prec_apk);
-			Options.v().set_soot_classpath(".:"+apkFileLocation+":"+androidJar);
-		
-			// Create dummy main
-			SetupApplication setup = new SetupApplication(androidJar, apkFileLocation);
-			setup.calculateSourcesSinksEntrypoints("SourcesAndSinks.txt");
-			Options.v().set_src_prec(Options.src_prec_apk);
-			Options.v().set_soot_classpath(".:"+apkFileLocation+":"+androidJar);
-			//Options.v().allow_phantom_refs();
-			SootMethod entryPoint = setup.getEntryPointCreator().createDummyMain();
+			List<ClassProvider> classProviders = new LinkedList<>();
+			classProviders.add((ClassProvider) provider);	
+			classProviders.add(new DexClassProvider());
+			SourceLocator.v().setClassProviders(classProviders);
+			// Sequence?
+			SootSceneUtil.addCommonDynamicClasses(provider);	
 
+			if (AverroesOptions.isAndroid()) {	
+				String apkFileLocation = AverroesOptions.getApplicationInputs().get(0);
+				Options.v().set_soot_classpath(apkFileLocation);
 
-			System.out.println();
-			System.out.println("Class containing dummy main: " + entryPoint.getDeclaringClass().getName());
+				ApkHandler apkHandler = new ApkHandler(apkFileLocation);
+				ProcessManifest processMan = new ProcessManifest(apkFileLocation);
+				Set<String> entrypoints = processMan.getEntryPointClasses();
+				AndroidEntryPointCreator entryPointCreator = new AndroidEntryPointCreator(new ArrayList<String>(
+					entrypoints));
+				SootMethod dummyMain = entryPointCreator.createDummyMain();
+				Scene.v().setEntryPoints(Arrays.asList(dummyMain));
+			}
+			else {
+				Options.v().classes().addAll(provider.getApplicationClassNames());
+			}
 			
-			// If we don't set the super class of the dummy main class, there will be an error
-			entryPoint.getDeclaringClass().setSuperclass(G.v().soot_Scene().getSootClass("java.lang.Object"));
+			
+			// Load substitution classes?	
+				
 
+			Options.v().set_validate(true);
+	
 			// Load the necessary classes
 			System.out.println("");
 			System.out.println("Loading classes ...");
-
-			Options.v().set_main_class(entryPoint.getSignature());
-			Options.v().set_validate(true);
-
-			Scene.v().setEntryPoints(Arrays.asList(entryPoint));
 			
 			Scene.v().loadNecessaryClasses();
 			

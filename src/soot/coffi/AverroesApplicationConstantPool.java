@@ -11,6 +11,7 @@ import soot.SootField;
 import soot.SootFieldRef;
 import soot.SootMethod;
 import soot.Type;
+import averroes.options.AverroesOptions;
 import averroes.soot.Hierarchy;
 import averroes.util.BytecodeUtils;
 
@@ -129,13 +130,17 @@ public class AverroesApplicationConstantPool {
 	private Set<SootMethod> findLibraryMethodsInConstantPool(SootClass applicationClass) {
 		Set<SootMethod> result = new HashSet<SootMethod>();
 
+		if (AverroesOptions.isAndroid()) {
+			return result;
+		}
+
 		/*
 		 * This is only useful if the application class has any methods. Some
 		 * classes will not have any methods in them, e.g.,
 		 * org.jfree.data.xml.DatasetTags which is an interface that has some
 		 * final constants only.
 		 */
-		if (applicationClass.getMethodCount() > 0 && !applicationClass.getName().equals("dummyMainClass")) { // TODO
+		if (applicationClass.getMethodCount() > 0) {
 			ClassFile coffiClass = getCoffiClass(applicationClass);
 			cp_info[] constantPool = coffiClass.constant_pool;
 
@@ -228,6 +233,10 @@ public class AverroesApplicationConstantPool {
 		Set<SootClass> result = new HashSet<SootClass>();
 		// Set<SootClass> classes = new HashSet<SootClass>();
 		// Set<String> substrings = new HashSet<String>();
+		
+		if (AverroesOptions.isAndroid()) {
+			return result;
+		}
 
 		/*
 		 * This is only useful if the application class has any methods. Some
@@ -235,7 +244,7 @@ public class AverroesApplicationConstantPool {
 		 * org.jfree.data.xml.DatasetTags which is an interface that has some
 		 * final constants only.
 		 */
-		if (applicationClass.getMethodCount() > 0 && !applicationClass.getName().equals("dummyMainClass")) {
+		if (applicationClass.getMethodCount() > 0) {
 			ClassFile coffiClass = getCoffiClass(applicationClass);
 			cp_info[] constantPool = coffiClass.constant_pool;
 
@@ -314,6 +323,10 @@ public class AverroesApplicationConstantPool {
 	 */
 	private Set<SootField> findLibraryFieldsInConstantPool(SootClass applicationClass) {
 		Set<SootField> result = new HashSet<SootField>();
+		
+		if (AverroesOptions.isAndroid()) {
+			return result;
+		}
 
 		/*
 		 * This is only useful if the application class has any methods. Some
@@ -321,7 +334,7 @@ public class AverroesApplicationConstantPool {
 		 * org.jfree.data.xml.DatasetTags which is an interface that has some
 		 * final constants only.
 		 */
-		if (applicationClass.getMethodCount() > 0 && !applicationClass.getName().equals("dummyMainClass")) {
+		if (applicationClass.getMethodCount() > 0) {
 			ClassFile coffiClass = getCoffiClass(applicationClass);
 			cp_info[] constantPool = coffiClass.constant_pool;
 

@@ -85,6 +85,11 @@ public final class AverroesOptions {
 			.addOption(tamiflexFactsFile).addOption(outputDirectory).addOption(jreDirectory).addOption(help);
 
 	private static CommandLine cmd;
+	
+	/**
+	 * Documents, whether an android or java application is processed
+	 */
+	private static boolean android = false;
 
 	/**
 	 * Process the input arguments of Averroes.
@@ -138,7 +143,7 @@ public final class AverroesOptions {
 	 * 
 	 * @return
 	 */
-	public static List<String> getApplicationJars() {
+	public static List<String> getApplicationInputs() {
 		return Arrays.asList(cmd.getOptionValue(applicationJars.getOpt()).split(File.pathSeparator));
 	}
 
@@ -305,5 +310,17 @@ public final class AverroesOptions {
 	 */
 	public static boolean isLibraryClass(String className) {
 		return !isApplicationClass(className);
+	}
+	
+	/**
+	 * Check if we process a java or android application
+	 * @return
+	 */
+	public static boolean isAndroid() {
+		return android;
+	}
+
+	public static void setAndroid(boolean android) {
+		AverroesOptions.android = android;
 	}
 }

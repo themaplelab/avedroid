@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
@@ -23,6 +24,7 @@ import java.util.zip.ZipFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 
+import averroes.exceptions.AverroesException;
 import averroes.options.AverroesOptions;
 import averroes.util.io.Paths;
 
@@ -81,10 +83,10 @@ public class JarOrganizer {
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 */
-	public void organizeInputJarFiles() throws ZipException, IOException {
-//		processInputs();
+	public void organizeInputJarFiles() throws ZipException, IOException, AverroesException {
+		processInputs();
 		processDependencies();
-//		organizedApplicationJarFile.close();
+		organizedApplicationJarFile.close();
 		organizedLibraryJarFile.close();
 	}
 
@@ -94,15 +96,33 @@ public class JarOrganizer {
 	 * @throws ZipException
 	 * @throws IOException
 	 * @throws URISyntaxException
+	 * @throws AverroesException
 	 */
-	private void processInputs() throws ZipException, IOException {
-		AverroesOptions.getApplicationJars().forEach(jar -> processArchive(jar, true));
+	private void processInputs() throws ZipException, IOException, AverroesException {
+		List<String> applicationInputs = AverroesOptions.getApplicationInputs();
+		
+		// If the application input is an Android app there will be only one apk.
+		// Also, it's not as easy as with an apk (opposed to a jar) to extract class files.
+		// In case of a java application, we iterate twice over the application inputs.
+		// This is due to easier exception management (we can't pass the exception off of a lambda expression).
+		for (String s: applicationInputs) {
+			if (s.endsWith(".apk")) {
+				AverroesOptions.setAndroid(true);
+			}	
+		}
+		if (applicationInputs.size() > 1 && AverroesOptions.isAndroid()) {
+			throw new AverroesException("Mutliple application archives detected while in android mode. Only 1 apk is allowed.", new Exception());	
+		}
+		else {
+			applicationInputs.forEach(jar -> processArchive(jar, true));
+		}
 	}
+	
 
 	/**
 	 * Process the dependencies of the input JAR files.
 	 */
-	private void processDependencies() {
+	private void processDependencies() throws AverroesException {
 		// Add the application library dependencies
 		AverroesOptions.getLibraryJarFiles().forEach(lib -> processArchive(lib, false));
 
@@ -141,12 +161,10 @@ public class JarOrganizer {
 		if (fileName.trim().length() <= 0) {
 			return;
 		}
-
+		
 		File file = new File(fileName);
 		System.out.println("Processing " + (fromApplicationArchive ? "input" : "library") + " archive: "
-				+ file.getAbsolutePath());
-		
-		
+				+ file.getAbsolutePath());	
 
 		try {
 			ZipFile archive = new ZipFile(file);
