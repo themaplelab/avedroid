@@ -12,11 +12,11 @@ import java.util.Set;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import averroes.android.axml.AXmlAttribute;
+import averroes.android.axml.AXmlHandler;
+import averroes.android.axml.AXmlNode;
+import averroes.android.axml.ApkHandler;
 import pxb.android.axml.AxmlVisitor;
-import soot.jimple.infoflow.android.axml.AXmlAttribute;
-import soot.jimple.infoflow.android.axml.AXmlHandler;
-import soot.jimple.infoflow.android.axml.AXmlNode;
-import soot.jimple.infoflow.android.axml.ApkHandler;
 
 /**
  * This class provides easy access to all data of an AppManifest.<br />

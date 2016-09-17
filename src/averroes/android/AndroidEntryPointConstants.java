@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * Class containing constants for the well-known Android lifecycle methods
  */
-class AndroidEntryPointConstants {
+public class AndroidEntryPointConstants {
 	
 	/*========================================================================*/
 

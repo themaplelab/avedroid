@@ -10,12 +10,9 @@
  *******************************************************************************/
 package averroes;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 
@@ -26,9 +23,7 @@ import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.SourceLocator;
-import soot.jimple.infoflow.android.SetupApplication;
 import soot.options.Options;
-import soot.util.Chain;
 import averroes.options.AverroesOptions;
 import averroes.soot.CodeGenerator;
 import averroes.soot.Hierarchy;
@@ -37,10 +32,7 @@ import averroes.soot.SootSceneUtil;
 import averroes.util.MathUtils;
 import averroes.util.TimeUtils;
 import averroes.util.io.Paths;
-import averroes.android.AndroidEntryPointCreator;
-import averroes.android.ApkHandler;
-import averroes.android.ProcessManifest;
-
+import averroes.android.SetupAndroid;
 /**
  * The main Averroes class.
  * 
@@ -86,34 +78,26 @@ public class Main {
 			JarFactoryClassProvider provider = new JarFactoryClassProvider();
 			provider.prepareJarFactoryClasspath();	
 
-			// Set some soot parameters
 			List<ClassProvider> classProviders = new LinkedList<>();
 			classProviders.add((ClassProvider) provider);	
 			classProviders.add(new DexClassProvider());
 			SourceLocator.v().setClassProviders(classProviders);
-			// Sequence?
-			SootSceneUtil.addCommonDynamicClasses(provider);	
-
+			SootSceneUtil.addCommonDynamicClasses(provider);
+			
+			SetupAndroid setupAndroid = null;
+			SootMethod dummyMain = null;
 			if (AverroesOptions.isAndroid()) {	
-				String apkFileLocation = AverroesOptions.getApplicationInputs().get(0);
-				Options.v().set_soot_classpath(apkFileLocation);
-
-				ApkHandler apkHandler = new ApkHandler(apkFileLocation);
-				ProcessManifest processMan = new ProcessManifest(apkFileLocation);
-				Set<String> entrypoints = processMan.getEntryPointClasses();
-				AndroidEntryPointCreator entryPointCreator = new AndroidEntryPointCreator(new ArrayList<String>(
-					entrypoints));
-				SootMethod dummyMain = entryPointCreator.createDummyMain();
-				Scene.v().setEntryPoints(Arrays.asList(dummyMain));
+				setupAndroid = new SetupAndroid();
+				dummyMain = setupAndroid.createDummyMain();
+				setupAndroid.findXmlCallbacks();
+				Scene.v().setEntryPoints(Arrays.asList(dummyMain));	
 			}
 			else {
 				Options.v().classes().addAll(provider.getApplicationClassNames());
-			}
-			
-			
+			}	
+						
 			// Load substitution classes?	
 				
-
 			Options.v().set_validate(true);
 	
 			// Load the necessary classes
