@@ -115,6 +115,8 @@ public class Main {
 			System.out.println("");
 			System.out.println("Creating the class hierarchy for the placeholder library ...");
 			Hierarchy.v();
+			
+//			System.out.println(Scene.v().getSootClass("android.location.LocationManager").getMethods());
 
 			// Output some initial statistics
 			System.out.println("# initial application classes: " + Hierarchy.v().getApplicationClasses().size());

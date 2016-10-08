@@ -1,8 +1,15 @@
 package soot.coffi;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.jf.dexlib2.DexFileFactory;
+import org.jf.dexlib2.Opcodes;
+import org.jf.dexlib2.dexbacked.DexBackedDexFile;
+import org.jf.dexlib2.dexbacked.raw.MethodIdItem;
+import org.jf.dexlib2.dexbacked.raw.RawDexFile;
 
 import soot.ResolutionFailedException;
 import soot.Scene;
@@ -11,9 +18,11 @@ import soot.SootField;
 import soot.SootFieldRef;
 import soot.SootMethod;
 import soot.Type;
+import soot.dexpler.DexType;
 import averroes.options.AverroesOptions;
 import averroes.soot.Hierarchy;
 import averroes.util.BytecodeUtils;
+import averroes.util.DexUtils;
 
 /**
  * A class that holds the values of library methods and fields found in the
@@ -131,6 +140,58 @@ public class AverroesApplicationConstantPool {
 		Set<SootMethod> result = new HashSet<SootMethod>();
 
 		if (AverroesOptions.isAndroid()) {
+			// TODO: API LEVEL
+			// int apilevel = ...
+			int api = 17;
+			try {
+				File apk = new File(AverroesOptions.getApplicationInputs().get(0));
+				RawDexFile rawDex = DexUtils.getRawDex(apk, null, Opcodes.forApi(api));
+				String[] methods = MethodIdItem.getMethods(rawDex);
+				for (String s: methods) {
+					// Sample string: Landroid/app/PendingIntent;->getActivity(Landroid/content/Context;ILandroid/content/Intent;I)Landroid/app/PendingIntent;
+					/*String[] parts = s.split("((?<=;)|\\(|\\))");	// (;|\\(|\\))
+					Type clazz = DexType.toSoot(parts[0]);
+					String methodName = parts[1].substring(2, parts[1].length());
+					int idx = 2;
+					Type[] params = null;
+					if (!parts[idx].isEmpty()) { // Parameter list is not empty
+						params = new Type[parts.length-3];
+						while (idx < (parts.length - 1)) {
+							params[idx-2] = DexType.toSoot(parts[idx]);
+							idx++;
+						}
+					}
+					else {
+						idx++;
+					}	
+					String returnTypeString = parts[idx];
+					if (returnTypeString.charAt(0) == ')')
+						returnTypeString = returnTypeString.substring(1);
+					Type returnType = DexType.toSoot(parts[idx]);
+					*/
+					
+					String[] parts = s.split("-");
+					String className = parts[0];
+					className = className.replace('/', '.');
+					// Remove "L" and ";"
+					className = className.substring(1, className.length()-1);
+					int idx = parts[1].indexOf('(');
+					String methodName = parts[1].substring(1, idx);
+					String methodDescriptor = parts[1].substring(idx);
+					
+					System.out.println(className);
+					SootMethod method = BytecodeUtils.makeSootMethod(className, methodName, methodDescriptor);
+					result.add(method);
+
+				}	
+			}
+			catch (IOException ioEx) {
+				ioEx.printStackTrace();
+			}
+			catch (Exception ex) {
+				ex.printStackTrace();
+			}
+			
 			return result;
 		}
 

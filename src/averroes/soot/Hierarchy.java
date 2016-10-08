@@ -363,7 +363,9 @@ public class Hierarchy {
 	}
 	
 	private boolean isLifeCycle(SootMethod method) {
-		return AndroidEntryPointConstants.getActivityLifecycleMethods().contains(method.getSubSignature());
+		// TODO Check for correctness and add other components (e.g. service)
+		return AndroidEntryPointConstants.getActivityLifecycleMethods().contains(method.getSubSignature()) 
+				|| AndroidEntryPointConstants.getApplicationLifecycleMethods().contains(method.getSubSignature());
 	}
 
 	/**

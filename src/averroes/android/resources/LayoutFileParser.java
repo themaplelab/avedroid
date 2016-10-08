@@ -33,7 +33,7 @@ import averroes.android.resources.ARSCFileParser.StringResource;
 /**
  * Parser for analyzing the layout XML files inside an android application
  * 
- * @author Steven Arzt
+ * @author Steven Arzt, Michael Appel
  *
  */
 public class LayoutFileParser extends AbstractResourceParser {
@@ -72,33 +72,38 @@ public class LayoutFileParser extends AbstractResourceParser {
 			return null;
 		}
 		
-		SootClass sc = Scene.v().forceResolve(className, SootClass.BODIES);
-		removeClassIfPhantom(sc);
+		SootClass sc = resolveWithPrefix("", className, SootClass.BODIES);
+		
 		if ((sc == null || sc.isPhantom()) && !packageName.isEmpty())
-			sc = Scene.v().forceResolve(packageName + "." + className, SootClass.BODIES);
-			removeClassIfPhantom(sc);
+			sc = resolveWithPrefix(packageName + ".", className, SootClass.BODIES);
 		if (!isRealClass(sc))
-			sc = Scene.v().forceResolve("android.view." + className, SootClass.BODIES);
-			removeClassIfPhantom(sc);
+			sc = resolveWithPrefix("android.view.", className, SootClass.BODIES);
 		if (!isRealClass(sc))
-			sc = Scene.v().forceResolve("android.widget." + className, SootClass.BODIES);
-			removeClassIfPhantom(sc);
+			sc = resolveWithPrefix("android.widget.", className, SootClass.BODIES);
 		if (!isRealClass(sc))
-			sc = Scene.v().forceResolve("android.webkit." + className, SootClass.BODIES);			
-			removeClassIfPhantom(sc);
+			sc = resolveWithPrefix("android.webkit.", className, SootClass.BODIES);			
 		if (!isRealClass(sc)) {
    			System.err.println("Could not find layout class " + className);
    			return null;
 		}
 		return sc;		
 	}
-	
-	private static void removeClassIfPhantom(SootClass sc) {
+
+	/**
+	 * This method is added in order to avoid the addition of phantom classes to the soot scene.
+	 * When Averroes tries to create these classes, it will crash (e.g. we only want to have
+	 * "android.widget.Button" and not "Button" in the scene.)
+	 * @param prefix
+	 * @param className
+	 * @param level
+	 * @return
+	 */
+	private static SootClass resolveWithPrefix(String prefix, String className, int level) {
+		SootClass sc = Scene.v().forceResolve(prefix + className, level);	
 		if (sc.isPhantom()) {
 			Scene.v().removeClass(sc);
-			boolean b = Scene.v().isIncluded(sc);
-			System.out.println();
 		}
+		return sc;
 	}
 	
 	private boolean isLayoutClass(SootClass theClass) {
