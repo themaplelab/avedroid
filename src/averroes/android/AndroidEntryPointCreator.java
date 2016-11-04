@@ -23,8 +23,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import averroes.infoflow.cfg.LibraryClassPatcher;
-import averroes.infoflow.data.SootMethodAndClass;
+import averroes.android.infoflow.data.SootMethodAndClass;
 import averroes.infoflow.util.SootMethodRepresentationParser;
 import soot.Body;
 import soot.IntType;
@@ -255,10 +254,10 @@ public class AndroidEntryPointCreator extends BaseEntryPointCreator implements I
 					// Initializes the ApplicationHolder static field with the singleton application 
 					// instance created above 
 					// (Used by the Activity::getApplication patched in LibraryClassPatcher)
-					SootClass scApplicationHolder = LibraryClassPatcher.createOrGetApplicationHolder();
+					/*SootClass scApplicationHolder = LibraryClassPatcher.createOrGetApplicationHolder();
 					body.getUnits().add(Jimple.v().newAssignStmt(
 							Jimple.v().newStaticFieldRef(scApplicationHolder.getFields().getFirst().makeRef()), 
-							applicationLocal));
+							applicationLocal));*/
 					//////////////
 					
 					break;

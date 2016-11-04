@@ -8,7 +8,7 @@
  * Contributors: Christian Fritz, Steven Arzt, Siegfried Rasthofer, Eric
  * Bodden, and others.
  ******************************************************************************/
-package averroes.infoflow.android.data;
+package averroes.android.infoflow.data;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import averroes.infoflow.data.SootMethodAndClass;
 import averroes.infoflow.util.SootMethodRepresentationParser;
 import soot.SootMethod;
 

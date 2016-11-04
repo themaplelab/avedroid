@@ -111,7 +111,7 @@ public class JarOrganizer {
 			}	
 		}
 		if (applicationInputs.size() > 1 && AverroesOptions.isAndroid()) {
-			throw new AverroesException("Mutliple application archives detected while in android mode. Only 1 apk is allowed.", new Exception());	
+			throw new AverroesException("Mutliple application archives detected while in Android mode. Only 1 apk is allowed.", new Throwable());	
 		}
 		else {
 			applicationInputs.forEach(jar -> processArchive(jar, true));

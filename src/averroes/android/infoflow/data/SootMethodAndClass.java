@@ -8,7 +8,7 @@
  * Contributors: Christian Fritz, Steven Arzt, Siegfried Rasthofer, Eric
  * Bodden, and others.
  ******************************************************************************/
-package averroes.infoflow.data;
+package averroes.android.infoflow.data;
 
 import java.util.ArrayList;
 import java.util.List;

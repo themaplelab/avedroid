@@ -139,9 +139,11 @@ public class JarFile {
 		}
 		close();
 
+		String ApkClassJar = "/home/vespertine/Projects/eclipse/test/platformsButton1/classes-dex2jar.jar";
 		// Set BCEL's repository class path.
 		SyntheticRepository rep = SyntheticRepository.getInstance(new ClassPath(averroesLibraryClassJar
-				+ File.pathSeparator + placeholderJar + File.pathSeparator + Paths.organizedApplicationJarFile()));
+				+ File.pathSeparator + placeholderJar + File.pathSeparator + Paths.organizedApplicationJarFile()
+				+ File.pathSeparator + ApkClassJar));
 		Repository.setRepository(rep);
 
 		// Now add the class files (including ones from placeholder JAR) to the

@@ -6,26 +6,30 @@ import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.jf.dexlib2.Opcode;
 import org.jf.dexlib2.Opcodes;
 import org.jf.dexlib2.dexbacked.raw.RawDexFile;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.io.ByteStreams;
 
+import averroes.android.SetupAndroid;
+
 /**
  * 
  * @author Michael Appel 
- *	Provides dex related utils.
+ * 
+ * Provides dex related utils.
  */
 
 public class DexUtils {
 	
 	/**
-	 * dexlib2 does not provide means to return a raw dex file. This method serves
-	 * as utility to return a object of type "RawDexFile" as defined in the dexlib2 library.
+	 * dexlib2 does not provide means to create a raw dex file. This method serves
+	 * as utility to return an object of type "RawDexFile".
 	 * @return
 	 */
-	public static RawDexFile getRawDex(File dexFile, String dexEntry, Opcodes opcodes) throws Exception {
+	public static RawDexFile getRawDex(File dexFile, String dexEntry) throws IOException {
         ZipFile zipFile = null;
         boolean isZipFile = false;
         try {
@@ -39,13 +43,13 @@ public class DexUtils {
                 throw new FileNotFoundException("zip file" + dexFile.getName() + " does not contain a " + zipEntryName + " file");
             }
             long fileLength = zipEntry.getSize();
-            if (fileLength < 40) {
-                throw new Exception("The " + zipEntryName + " file in " + dexFile.getName() + " is too small to be a valid dex file");
-            } else if (fileLength > Integer.MAX_VALUE) {
-                throw new Exception("The " + zipEntryName + " file in " + dexFile.getName() + " is too large to read in");
-            }
+
             byte[] dexBytes = new byte[(int)fileLength];
             ByteStreams.readFully(zipFile.getInputStream(zipEntry), dexBytes);
+
+            int api = SetupAndroid.v().getApiVersion();
+            Opcodes opcodes = Opcodes.forApi(api);
+            
             return new RawDexFile(opcodes, dexBytes);
         } catch (IOException ex) {
             // don't continue on if we know it's a zip file

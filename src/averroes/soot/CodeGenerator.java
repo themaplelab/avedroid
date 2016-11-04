@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import soot.ArrayType;
+import soot.Body;
 import soot.Local;
 import soot.Modifier;
 import soot.RefLikeType;
@@ -44,6 +46,7 @@ import soot.jimple.Jimple;
 import soot.jimple.JimpleBody;
 import soot.options.Options;
 import soot.util.JasminOutputStream;
+import averroes.android.SetupAndroid;
 import averroes.options.AverroesOptions;
 import averroes.tamiflex.TamiFlexFactsDatabase;
 import averroes.util.io.Paths;
@@ -68,6 +71,7 @@ public class CodeGenerator {
 	private SootClass averroesLibraryClass = null;
 	private SootClass averroesAbstractLibraryClass = null;
 	private AverroesJimpleBody doItAllBody = null;
+	private AverroesJimpleBody dummyMainBody = null;
 
 	/**
 	 * Get the CodeGenerator singleton.
@@ -219,6 +223,11 @@ public class CodeGenerator {
 
 			// Create its static initalizer
 			createAverroesLibraryClinit();
+			
+			// If we are running in Android mode we need to add the dummy main
+			if (AverroesOptions.isAndroid()) {
+				createAverroesLibraryDummyMain();
+			}
 
 			// Create the dotItAll method
 			createAverroesLibraryDoItAll();
@@ -451,6 +460,25 @@ public class CodeGenerator {
 
 		// Finally validate the Jimple body
 		body.validate();
+	}
+	
+		
+	/**
+	 * If running in Android mode, this method adds the dummy main to the Averroes library class.
+	 */
+	private void createAverroesLibraryDummyMain() {
+		SootMethod dM = SetupAndroid.v().getDummyMainMethod();	
+		Type stringArrayType = ArrayType.v(RefType.v("java.lang.String"), 1);
+		SootMethod dummyMain = new SootMethod(Names.AVERROES_DUMMY_MAIN_METHOD_NAME, Collections.singletonList(stringArrayType),
+				VoidType.v(), Modifier.PUBLIC | Modifier.STATIC);
+
+		averroesLibraryClass.addMethod(dummyMain);
+		Body b = dM.getActiveBody();
+		dummyMain.setActiveBody(b);
+		
+		dummyMain.getActiveBody().validate();
+				
+		b.validate();
 	}
 
 	/**

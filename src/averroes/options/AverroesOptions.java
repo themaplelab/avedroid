@@ -90,6 +90,9 @@ public final class AverroesOptions {
 	 * Documents, whether an android or java application is processed
 	 */
 	private static boolean android = false;
+	
+	// TODO: Refactor. Perhaps a new command line option for the android.jar?
+	private static String androidJar = null;
 
 	/**
 	 * Process the input arguments of Averroes.
@@ -322,5 +325,22 @@ public final class AverroesOptions {
 
 	public static void setAndroid(boolean android) {
 		AverroesOptions.android = android;
+	}
+	
+	public static String getAndroidJar() {
+		if (androidJar == null) {
+			for (String s: getLibraryJarFiles()) {
+				if (s.endsWith("android.jar")) {
+					androidJar = s;
+				}
+			}	
+		}
+		return androidJar;
+	}
+	
+	public static String getApk() {
+		if (isAndroid()) 
+			return getApplicationInputs().get(0);
+		return null;
 	}
 }

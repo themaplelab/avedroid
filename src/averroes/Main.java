@@ -69,6 +69,17 @@ public class Main {
 			jarOrganizer.organizeInputJarFiles();
 
 			// Print some statistics
+			
+			
+			/*	Too costly to filter the class names in constant pool?
+			if (AverroesOptions.isAndroid()) {	
+				System.out.println("# application classes: " + SetupAndroid.v().getApplicationClassCount());
+			}
+			else {	
+				System.out.println("# application classes: " + jarOrganizer.applicationClassNames().size());
+			}
+			*/
+
 			System.out.println("# application classes: " + jarOrganizer.applicationClassNames().size());
 			System.out.println("# library classes: " + jarOrganizer.libraryClassNames().size());
 
@@ -87,10 +98,10 @@ public class Main {
 			SetupAndroid setupAndroid = null;
 			SootMethod dummyMain = null;
 			if (AverroesOptions.isAndroid()) {	
-				setupAndroid = new SetupAndroid();
-				dummyMain = setupAndroid.createDummyMain();
+				setupAndroid = SetupAndroid.v();
 				setupAndroid.findXmlCallbacks();
-				Scene.v().setEntryPoints(Arrays.asList(dummyMain));	
+				dummyMain = setupAndroid.getDummyMainMethod();
+				//Scene.v().setEntryPoints(Arrays.asList(dummyMain)); this is actually not needed - why?	
 			}
 			else {
 				Options.v().classes().addAll(provider.getApplicationClassNames());

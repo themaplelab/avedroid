@@ -19,9 +19,9 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import averroes.infoflow.data.SootMethodAndClass;
+import averroes.android.infoflow.data.SootMethodAndClass;
 /**
- * handles conversion from the string representation of SootMethod to our internal format {@link averroes.infoflow.data.SootMethodAndClass}
+ * handles conversion from the string representation of SootMethod to our internal format {@link averroes.android.infoflow.data.SootMethodAndClass}
  *
  */
 public class SootMethodRepresentationParser {

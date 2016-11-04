@@ -15,7 +15,6 @@ import org.xmlpull.v1.XmlPullParserException;
 import averroes.android.axml.AXmlAttribute;
 import averroes.android.axml.AXmlHandler;
 import averroes.android.axml.AXmlNode;
-import averroes.android.axml.ApkHandler;
 import pxb.android.axml.AxmlVisitor;
 
 /**
