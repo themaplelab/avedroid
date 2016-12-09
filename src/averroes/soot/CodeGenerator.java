@@ -32,6 +32,7 @@ import soot.Local;
 import soot.Modifier;
 import soot.RefLikeType;
 import soot.RefType;
+import soot.Scene;
 import soot.SootClass;
 import soot.SootField;
 import soot.SootMethod;
@@ -40,12 +41,14 @@ import soot.SourceLocator;
 import soot.Type;
 import soot.Value;
 import soot.VoidType;
+import soot.javaToJimple.Util;
 import soot.jimple.IntConstant;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Jimple;
 import soot.jimple.JimpleBody;
 import soot.options.Options;
 import soot.util.JasminOutputStream;
+import averroes.android.AndroidEntryPointConstants;
 import averroes.android.SetupAndroid;
 import averroes.options.AverroesOptions;
 import averroes.tamiflex.TamiFlexFactsDatabase;
@@ -474,6 +477,13 @@ public class CodeGenerator {
 
 		averroesLibraryClass.addMethod(dummyMain);
 		Body b = dM.getActiveBody();
+		/*for (Local l: b.getLocals()) {
+			Scene.v().getRefType(l.getType().toString())   Scene.v().getSootClass("android.app.Activity").getType().)
+			if (l.getType(). {
+				
+			}
+		}*/
+		
 		dummyMain.setActiveBody(b);
 		
 		dummyMain.getActiveBody().validate();
@@ -543,6 +553,10 @@ public class CodeGenerator {
 	 */
 	private void callApplicationMethodsReflectively() {
 		for (SootMethod toCall : getAllMethodsToCallReflectively()) {
+			// TODO: Is that correct? We want to skip lifecycle methods because these are modeled in the dummy main
+			if (isLifeCycle(toCall)) {
+				continue;
+			}
 			SootClass cls = toCall.getDeclaringClass();
 			// SootClass cls = Hierarchy.v().getClass(toCall.getSignature());
 			SootMethodRef methodRef = toCall.makeRef();
@@ -579,6 +593,12 @@ public class CodeGenerator {
 			doItAllBody.storeLibraryPointsToField(ret);
 		}
 
+	}
+	
+	private boolean isLifeCycle(SootMethod method) {
+		// TODO: Refactor (e.g. store the method signatures inside this class)?
+		return AndroidEntryPointConstants.isLifecycleClass(method.getDeclaringClass().getName()) &&
+				AndroidEntryPointConstants.getComponentLifecycleMethods().contains(method.getSubSignature());
 	}
 
 	/**

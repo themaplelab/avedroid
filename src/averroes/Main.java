@@ -71,16 +71,18 @@ public class Main {
 			// Print some statistics
 			
 			
-			/*	Too costly to filter the class names in constant pool?
+			// TODO: Refactor...	
+			// At the moment, all classes that are built by the compiler (e.g. pkg.MyActivity$2)
+			// are count, too.
 			if (AverroesOptions.isAndroid()) {	
-				System.out.println("# application classes: " + SetupAndroid.v().getApplicationClassCount());
+				System.out.println("# referenced application classes: " + SetupAndroid.v().getReferencedApplicationClassCount());
+				System.out.println("# referenced application methods: " + SetupAndroid.v().getReferencedApplicationMethodCount());
 			}
 			else {	
 				System.out.println("# application classes: " + jarOrganizer.applicationClassNames().size());
 			}
-			*/
 
-			System.out.println("# application classes: " + jarOrganizer.applicationClassNames().size());
+			//System.out.println("# application classes: " + jarOrganizer.applicationClassNames().size());
 			System.out.println("# library classes: " + jarOrganizer.libraryClassNames().size());
 
 			// Add the organized archives for the application and its
@@ -101,7 +103,7 @@ public class Main {
 				setupAndroid = SetupAndroid.v();
 				setupAndroid.findXmlCallbacks();
 				dummyMain = setupAndroid.getDummyMainMethod();
-				//Scene.v().setEntryPoints(Arrays.asList(dummyMain)); this is actually not needed - why?	
+				//Scene.v().setEntryPoints(Arrays.asList(dummyMain));	
 			}
 			else {
 				Options.v().classes().addAll(provider.getApplicationClassNames());
@@ -131,6 +133,7 @@ public class Main {
 
 			// Output some initial statistics
 			System.out.println("# initial application classes: " + Hierarchy.v().getApplicationClasses().size());
+			System.out.println(Hierarchy.v().getApplicationClasses());
 			System.out.println("# initial library classes: " + Hierarchy.v().getLibraryClasses().size());
 			System.out.println("# initial library methods: " + Hierarchy.v().getLibraryMethodCount());
 			System.out.println("# initial library fields: " + Hierarchy.v().getLibraryFieldCount());

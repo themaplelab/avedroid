@@ -443,7 +443,7 @@ public class AverroesApplicationConstantPool {
 			*/		
 			String[] parts = s.split("->");
 			String className = "";
-			if (parts[0].startsWith("[J")) // TODO: why? is that correct? 
+			if (parts[0].startsWith("[J") || parts[0].startsWith("[I")) // TODO: why? is that correct? 
 				className = "Ljava.lang.Object;";
 			else
 				className = parts[0];	

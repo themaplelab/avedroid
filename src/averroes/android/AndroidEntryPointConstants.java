@@ -10,6 +10,7 @@
  ******************************************************************************/
 package averroes.android;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -125,6 +126,40 @@ public class AndroidEntryPointConstants {
 		APPLIFECYCLECALLBACK_ONACTIVITYDESTROYED,
 		APPLIFECYCLECALLBACK_ONACTIVITYCREATED};
 	
+	// Activity, Service, Application and ContentProvider lifecycle methods
+	private static final String[] componentMethods = {
+		ACTIVITY_ONCREATE,
+		ACTIVITY_ONDESTROY,
+		ACTIVITY_ONPAUSE,
+		ACTIVITY_ONRESTART,
+		ACTIVITY_ONRESUME,
+		ACTIVITY_ONSTART,
+		ACTIVITY_ONSTOP,
+		ACTIVITY_ONSAVEINSTANCESTATE,
+		ACTIVITY_ONRESTOREINSTANCESTATE,
+		ACTIVITY_ONCREATEDESCRIPTION,
+		ACTIVITY_ONPOSTCREATE,
+		ACTIVITY_ONPOSTRESUME,
+		APPLICATION_ONCREATE,
+		APPLICATION_ONTERMINATE,
+		APPLIFECYCLECALLBACK_ONACTIVITYSTARTED,
+		APPLIFECYCLECALLBACK_ONACTIVITYSTOPPED,
+		APPLIFECYCLECALLBACK_ONACTIVITYSAVEINSTANCESTATE,
+		APPLIFECYCLECALLBACK_ONACTIVITYRESUMED,
+		APPLIFECYCLECALLBACK_ONACTIVITYPAUSED,
+		APPLIFECYCLECALLBACK_ONACTIVITYDESTROYED,
+		APPLIFECYCLECALLBACK_ONACTIVITYCREATED,
+		CONTENTPROVIDER_ONCREATE,
+		SERVICE_ONCREATE,
+		SERVICE_ONDESTROY,
+		SERVICE_ONSTART1,
+		SERVICE_ONSTART2,
+		SERVICE_ONBIND,
+		SERVICE_ONREBIND,
+		SERVICE_ONUNBIND
+	};
+
+	
 	/*========================================================================*/
 	
 	public static List<String> getActivityLifecycleMethods(){
@@ -153,6 +188,10 @@ public class AndroidEntryPointConstants {
 
 	public static List<String> getApplicationLifecycleMethods(){
 		return Arrays.asList(applicationMethods);
+	}
+	
+	public static List<String> getComponentLifecycleMethods() {
+		return Arrays.asList(componentMethods);
 	}
 
 	/*========================================================================*/

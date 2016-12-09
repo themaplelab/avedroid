@@ -40,6 +40,7 @@ import org.apache.commons.io.FileUtils;
 
 import soot.SootMethod;
 import averroes.exceptions.Assertions;
+import averroes.options.AverroesOptions;
 import averroes.soot.Names;
 import averroes.util.io.Paths;
 
@@ -139,7 +140,8 @@ public class JarFile {
 		}
 		close();
 
-		String ApkClassJar = "/home/vespertine/Projects/eclipse/test/platformsButton1/classes-dex2jar.jar";
+		String ApkClassJar = AverroesOptions.getApkJar();
+		
 		// Set BCEL's repository class path.
 		SyntheticRepository rep = SyntheticRepository.getInstance(new ClassPath(averroesLibraryClassJar
 				+ File.pathSeparator + placeholderJar + File.pathSeparator + Paths.organizedApplicationJarFile()

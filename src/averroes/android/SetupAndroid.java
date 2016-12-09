@@ -12,8 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jf.dexlib2.dexbacked.raw.ClassDefItem;
+import org.jf.dexlib2.dexbacked.raw.MethodIdItem;
 import org.jf.dexlib2.dexbacked.raw.RawDexFile;
 
 import averroes.android.infoflow.data.AndroidMethod;
@@ -37,8 +40,10 @@ import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.SourceLocator;
+import soot.Type;
 import soot.Unit;
 import soot.Value;
+import soot.coffi.Util;
 import soot.jimple.IntConstant;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
@@ -48,7 +53,7 @@ import soot.options.Options;
 /**
  * Sets up Averroes such that it works with Android applications. Specifically,
  * this class analyzes the apk for xml callbacks and handles the dummy main
- * creation.
+ * creation. Many parts of the code originate from FlowDroid.
  * 
  * @author Michael Appel
  *
@@ -106,14 +111,17 @@ public class SetupAndroid {
 		}
 		this.entrypoints = processMan.getEntryPointClasses();
 
-		Options.v().set_soot_classpath(apkFileLocation);
+		Options.v().set_soot_classpath(apkFileLocation + File.pathSeparator + AverroesOptions.getAndroidJar());
 	}
 	
 	public SootMethod getDummyMainMethod() {			
 		if (dummyMain != null) {
 			return dummyMain;
 		}
-	
+		
+		Options.v().set_soot_classpath(apkFileLocation + File.pathSeparator + AverroesOptions.getAndroidJar());
+		System.out.println(Options.v().soot_classpath());
+		
 		AndroidEntryPointCreator entryPointCreator = createEntryPointCreator();
 		dummyMain = entryPointCreator.createDummyMain();
 		dummyMain.getDeclaringClass().setSuperclass(G.v().soot_Scene().getSootClass(Names.JAVA_LANG_OBJECT));
@@ -146,6 +154,7 @@ public class SetupAndroid {
 		// the Scene needs to be reset afterwards
 
 		Options.v().set_process_dir(Collections.singletonList(apkFileLocation));
+		//Options.v().set_allow_phantom_refs(true);
 		Scene.v().loadNecessaryClasses();
 					
 		findClassLayoutMappings();
@@ -352,10 +361,50 @@ public class SetupAndroid {
 		return rawDex;
 	}
 	
-	public int getApplicationClassCount() {
+	public int getReferencedApplicationClassCount() {
+		// TODO: Refactor
 		String[] classes = ClassDefItem.getClasses(getRawDex());
-		// TODO: Filter library classes... is this worth it?
-		return classes.length;
+		List<String> result = new LinkedList<>();
+		
+		String patternString = AverroesOptions.getEscapedApplicationRegex();
+		Pattern p = Pattern.compile(patternString);	
+
+		for (String s: classes) {		
+			Type jimpleType = Util.v().jimpleTypeOfFieldDescriptor(s);
+			Matcher m = p.matcher(jimpleType.toString());
+			while (m.find()) {
+				String match = m.group();
+				result.add(match);
+			}	
+		}
+		
+		/*for (String s: result) {
+			System.out.println(s);
+		}*/
+		return result.size();
+	}
+	
+	public int getReferencedApplicationMethodCount() {
+		String[] methods = MethodIdItem.getMethods(getRawDex());
+		
+		List<String> result = new LinkedList<>();
+		
+		String patternString = AverroesOptions.getEscapedApplicationRegex();
+		Pattern p = Pattern.compile(patternString);	
+
+		for (String s: methods) {		
+			String[] clazzAndMethod = s.split("-");
+			Type jimpleType = Util.v().jimpleTypeOfFieldDescriptor(clazzAndMethod[0]);
+			Matcher m = p.matcher(jimpleType.toString());
+			while (m.find()) {
+				String match = m.group();
+				result.add(s);
+			}	
+		}
+		/*for (String s: result) {
+			System.out.println(s);
+		}*/
+		return result.size();	
 	}
 		
 	public int getApiVersion() {	

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package averroes.soot;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -363,9 +364,9 @@ public class Hierarchy {
 	}
 	
 	private boolean isLifeCycle(SootMethod method) {
-		// TODO Check for correctness and add other components (e.g. service)
-		return AndroidEntryPointConstants.getActivityLifecycleMethods().contains(method.getSubSignature()) 
-				|| AndroidEntryPointConstants.getApplicationLifecycleMethods().contains(method.getSubSignature());
+		// TODO: Refactor (e.g. store the method signatures inside this class)?
+		return AndroidEntryPointConstants.isLifecycleClass(method.getDeclaringClass().getName()) &&
+				AndroidEntryPointConstants.getComponentLifecycleMethods().contains(method.getSubSignature());
 	}
 
 	/**

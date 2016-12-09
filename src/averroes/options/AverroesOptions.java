@@ -16,6 +16,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -75,7 +76,7 @@ public final class AverroesOptions {
 
 	private static Option jreDirectory = Option.builder("j").longOpt("java-runtime-directory")
 			.desc("the directory that contains the Java runtime environment that Averroes should model").hasArg()
-			.argName("directory").required().build();
+			.argName("directory").required(false).build();
 
 	private static Option help = Option.builder("h").longOpt("help").desc("print out this help message").hasArg(false)
 			.required(false).build();
@@ -129,6 +130,30 @@ public final class AverroesOptions {
 	 */
 	public static List<String> getApplicationRegex() {
 		return Arrays.asList(cmd.getOptionValue(applicationRegex.getOpt()).split(File.pathSeparator));
+	}
+	
+
+	/**
+	 * A regex pattern that is usable by a java.regex.Matcher
+	 * TODO: Refactor
+	 * @return
+	 */
+	public static String getEscapedApplicationRegex() {
+		List<String> appRegex = AverroesOptions.getApplicationRegex();
+		StringBuilder pattern = new StringBuilder();
+		
+		for (String s: appRegex) {
+			pattern.append("(");
+			pattern.append(s);
+			pattern.append(")|");
+		}
+		
+		pattern.deleteCharAt(pattern.length()-1);
+		String patternString = pattern.toString();
+		patternString = patternString.replaceAll("\\.", "\\\\.");
+		patternString = patternString.replaceAll("\\*+", "\\.*");	
+
+		return patternString;
 	}
 
 	/**
@@ -341,6 +366,15 @@ public final class AverroesOptions {
 	public static String getApk() {
 		if (isAndroid()) 
 			return getApplicationInputs().get(0);
+		return null;
+	}
+	
+	// TODO: Refactor...
+	public static String getApkJar() {
+		if (isAndroid()) {
+			String apk = getApk();
+			return apk.replace(".apk", ".jar");	
+		}
 		return null;
 	}
 }
