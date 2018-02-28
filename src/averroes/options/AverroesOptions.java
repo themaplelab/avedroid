@@ -85,6 +85,9 @@ public final class AverroesOptions {
 			.addOption(tamiflexFactsFile).addOption(outputDirectory).addOption(jreDirectory).addOption(help);
 
 	private static CommandLine cmd;
+	private static boolean android = false; // check is android or java application is processed.
+	private static String androidJar = null;
+
 
 	/**
 	 * Process the input arguments of Averroes.
@@ -93,6 +96,7 @@ public final class AverroesOptions {
 	 */
 	public static void processArguments(String[] args) {
 		try {
+				
 			cmd = new DefaultParser().parse(options, args);
 
 			// Do we need to print out help messages?
@@ -121,6 +125,29 @@ public final class AverroesOptions {
 	 */
 	public static List<String> getApplicationRegex() {
 		return Arrays.asList(cmd.getOptionValue(applicationRegex.getOpt()).split(File.pathSeparator));
+	}
+	
+	/**
+	 * A regex pattern that is usable by a java.regex.Matcher
+	 * TODO: Refactor
+	 * @return
+	 */
+	public static String getEscapedApplicationRegex() {
+		List<String> appRegex = AverroesOptions.getApplicationRegex();
+		StringBuilder pattern = new StringBuilder();
+		
+		for (String s: appRegex) {
+			pattern.append("(");
+			pattern.append(s);
+			pattern.append(")|");
+		}
+		
+		pattern.deleteCharAt(pattern.length()-1);
+		String patternString = pattern.toString();
+		patternString = patternString.replaceAll("\\.", "\\\\.");
+		patternString = patternString.replaceAll("\\*+", "\\.*");	
+
+		return patternString;
 	}
 
 	/**
@@ -305,5 +332,37 @@ public final class AverroesOptions {
 	 */
 	public static boolean isLibraryClass(String className) {
 		return !isApplicationClass(className);
+	}
+/**
+ * Check if an android app is being processed.
+ * 
+ * @return 
+ */
+	public static boolean isAndroid() {
+		
+		return android;
+	}
+	/**
+	 * 
+	 * @param android  true if android app, false otherwise.
+	 */
+	public static void setAndroid(boolean android) {
+		AverroesOptions.android = android;
+	}
+	public static String getAndroidJar() {
+		if (androidJar == null) {
+			for (String s: getLibraryJarFiles()) {
+				if (s.endsWith("android.jar")) {
+					androidJar = s;
+				}
+			}	
+		}
+		return androidJar;
+	}
+	
+	public static String getApk() {
+		if (isAndroid()) 
+			return getApplicationJars().get(0);
+		return null;
 	}
 }
